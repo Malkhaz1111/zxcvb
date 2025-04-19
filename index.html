@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ფასების ანალიზი და პროგნოზი</title>
+    <style>
+        :root {
+            --primary: #3a6ff7;
+            --secondary: #1e2026;
+            --accent: #f7a600;
+            --text: #e6e6e6;
+            --bg: #0e1217;
+            --card-bg: #161c25;
+            --green: #0ecb81;
+            --red: #f6465d;
+            --neutral: #768396;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #2d3748;
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo span {
+            color: var(--accent);
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .market-label {
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .crypto {
+            background-color: rgba(247, 166, 0, 0.2);
+            color: var(--accent);
+        }
+        
+        .forex {
+            background-color: rgba(58, 111, 247, 0.2);
+            color: var(--primary);
+        }
+        
+        .price-info {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 15px;
+        }
+        
+        .current-price {
+            font-size: 24px;
+            font-weight: 700;
+            margin-right: 10px;
+        }
+        
+        .price-change {
+            font-size: 14px;
+            font-weight: 500;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        
+        .up {
+            background-color: rgba(14, 203, 129, 0.2);
+            color: var(--green);
+        }
+        
+        .down {
+            background-color: rgba(246, 70, 93, 0.2);
+            color: var(--red);
+        }
+        
+        .prediction-timeline {
+            margin-top: 20px;
+        }
+        
+        .timeline-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text);
+        }
+        
+        .timeline {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .timeline-item {
+            background-color: rgba(45, 55, 72, 0.4);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .timeline-label {
+            font-size: 14px;
+            color: var(--neutral);
+            margin-bottom: 10px;
+        }
+        
+        .timeline-prediction {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .technical-indicators {
+            margin-top: 25px;
+        }
+        
+        .indicators-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .indicator {
+            background-color: rgba(45, 55, 72, 0.4);
+            padding: 12px;
+            border-radius: 8px;
+        }
+        
+        .indicator-name {
+            font-size: 14px;
+            color: var(--neutral);
+            margin-bottom: 5px;
+        }
+        
+        .indicator-value {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .chart-area {
+            height: 100px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .chart-line {
+            stroke: var(--primary);
+            stroke-width: 2;
+            fill: none;
+        }
+        
+        .chart-area-fill {
+            fill: url(#gradient);
+            opacity: 0.2;
+        }
+        
+        .summary-section {
+            margin-top: 30px;
+        }
+        
+        .summary-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+        
+        .summary-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .summary-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .summary-card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+        
+        .signals-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .signal {
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            background-color: rgba(45, 55, 72, 0.4);
+        }
+        
+        .signal-title {
+            font-size: 12px;
+            color: var(--neutral);
+            margin-bottom: 8px;
+        }
+        
+        .signal-value {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .buy {
+            color: var(--green);
+        }
+        
+        .sell {
+            color: var(--red);
+        }
+        
+        .neutral {
+            color: var(--accent);
+        }
+        
+        .auto-refresh {
+            text-align: center;
+            margin-top: 30px;
+            color: var(--neutral);
+            font-size: 14px;
+        }
+        
+        .pulse {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--green);
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .signals-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">TRADE<span>PRO</span></div>
+    </header>
+    
+    <div class="container" id="markets-container">
+        <!-- აქ დინამიურად გენერირდება ბარათები -->
+    </div>
+    
+    <div class="summary-section">
+        <h2 class="summary-title">ბაზრის ანალიზი</h2>
+        <div class="summary-container">
+            <div class="summary-card">
+                <h3 class="summary-card-title">ტექნიკური სიგნალები</h3>
+                <div class="signals-grid">
+                    <div class="signal">
+                        <div class="signal-title">მოკლევადიანი</div>
+                        <div class="signal-value buy" id="short-term-signal">ყიდვა</div>
+                    </div>
+                    <div class="signal">
+                        <div class="signal-title">საშუალოვადიანი</div>
+                        <div class="signal-value neutral" id="mid-term-signal">ნეიტრალური</div>
+                    </div>
+                    <div class="signal">
+                        <div class="signal-title">გრძელვადიანი</div>
+                        <div class="signal-value sell" id="long-term-signal">გაყიდვა</div>
+                    </div>
+                </div>
+                <div class="signals-grid">
+                    <div class="signal">
+                        <div class="signal-title">ოსცილატორები</div>
+                        <div class="signal-value neutral" id="oscillator-signal">ნეიტრალური</div>
+                    </div>
+                    <div class="signal">
+                        <div class="signal-title">სამოძრაო საშუალოები</div>
+                        <div class="signal-value buy" id="ma-signal">ყიდვა</div>
+                    </div>
+                    <div class="signal">
+                        <div class="signal-title">ვოლატილობა</div>
+                        <div class="signal-value sell" id="volatility-signal">მაღალი</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="auto-refresh">
+        <span class="pulse"></span> ინფორმაცია ავტომატურად ახლდება ყოველ 30 წამში
+    </div>
+
+    <script>
+        // მონაცემები ბაზრებისთვის
+        const marketData = [
+            {
+                id: 'btc',
+                name: 'Bitcoin',
+                symbol: 'BTC/USDT',
+                type: 'crypto',
+                currentPrice: 61245.80,
+                change24h: 1.8,
+                indicators: {
+                    rsi: 67,
+                    macd: 'ბულიშ',
+                    stochastic: 'გადაყიდული',
+                    bollingerBands: 'ზედა ზოლთან',
+                    ema20: 'ფასის ზემოთ',
+                    ema50: 'ფასის ზემოთ'
+                }
+            },
+            {
+                id: 'eth',
+                name: 'Ethereum',
+                symbol: 'ETH/USDT',
+                type: 'crypto',
+                currentPrice: 3078.45,
+                change24h: -0.8,
+                indicators: {
+                    rsi: 52,
+                    macd: 'ბეარიშ',
+                    stochastic: 'ნეიტრალური',
+                    bollingerBands: 'შუაში',
+                    ema20: 'ფასის ქვემოთ',
+                    ema50: 'ფასის ზემოთ'
+                }
+            },
+            {
+                id: 'sol',
+                name: 'Solana',
+                symbol: 'SOL/USDT',
+                type: 'crypto',
+                currentPrice: 142.78,
+                change24h: 2.5,
+                indicators: {
+                    rsi: 72,
+                    macd: 'ბულიშ',
+                    stochastic: 'გადასყიდული',
+                    bollingerBands: 'გარღვევა ზემოთ',
+                    ema20: 'ფასის ზემოთ',
+                    ema50: 'ფასის ზემოთ'
+                }
+            },
+            {
+                id: 'eurusd',
+                name: 'Euro / US Dollar',
+                symbol: 'EUR/USD',
+                type: 'forex',
+                currentPrice: 1.0768,
+                change24h: -0.3,
+                indicators: {
+                    rsi: 45,
+                    macd: 'ბეარიშ',
+                    stochastic: 'გადაყიდული',
+                    bollingerBands: 'ქვედა ზოლთან',
+                    ema20: 'ფასის ქვემოთ',
+                    ema50: 'ფასის ქვემოთ'
+                }
+            },
+            {
+                id: 'gbpusd',
+                name: 'British Pound / US Dollar',
+                symbol: 'GBP/USD',
+                type: 'forex',
+                currentPrice: 1.2532,
+                change24h: 0.2,
+                indicators: {
+                    rsi: 55,
+                    macd: 'ნეიტრალური',
+                    stochastic: 'ნეიტრალური',
+                    bollingerBands: 'შუაში',
+                    ema20: 'ფასის ზემოთ',
+                    ema50: 'ფასის ქვემოთ'
+                }
+            },
+            {
+                id: 'usdjpy',
+                name: 'US Dollar / Japanese Yen',
+                symbol: 'USD/JPY',
+                type: 'forex',
+                currentPrice: 151.65,
+                change24h: 0.5,
+                indicators: {
+                    rsi: 62,
+                    macd: 'ბულიშ',
+                    stochastic: 'გადასყიდული',
+                    bollingerBands: 'შუაში',
+                    ema20: 'ფასის ზემოთ',
+                    ema50: 'ფასის ზემოთ'
+                }
+            }
+        ];
+        
+        // ბარათების ინიციალიზაცია
+        function initializeMarketCards() {
+            const container = document.getElementById('markets-container');
+            container.innerHTML = '';
+            
+            marketData.forEach(market => {
+                const card = createMarketCard(market);
+                container.appendChild(card);
+            });
+        }
+        
+        // ბარათის შექმნა
+        function createMarketCard(market) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            // პროგნოზების გენერირება
+            const predictions = generatePredictions(market);
+            
+            const priceDisplay = market.type === 'crypto' ? 
+                '$' + market.currentPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : 
+                market.currentPrice.toFixed(4);
+            
+            card.innerHTML = `
+                <div class="card-header">
+                    <div class="card-title">${market.name} (${market.symbol})</div>
+                    <span class="market-label ${market.type}">${market.type === 'crypto' ? 'კრიპტო' : 'ფორექსი'}</span>
+                </div>
+                <div class="price-info">
+                    <div class="current-price">${priceDisplay}</div>
+                    <div class="price-change ${market.change24h >= 0 ? 'up' : 'down'}">
+                        ${market.change24h >= 0 ? '+' : ''}${market.change24h}%
+                    </div>
+                </div>
+                <div class="chart-area">
+                    <svg width="100%" height="100%" viewBox="0 0 300 100" preserveAspectRatio="none">
+                        <defs>
+                            <linearGradient id="gradient-${market.id}" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="${market.change24h >= 0 ? '#0ecb81' : '#f6465d'}" />
+                                <stop offset="100%" stop-color="${market.change24h >= 0 ? '#0ecb81' : '#f6465d'}" stop-opacity="0" />
+                            </linearGradient>
+                        </defs>
+                        ${generateChartPath(market.change24h >= 0, market.id)}
+                    </svg>
+                </div>
+                <div class="prediction-timeline">
+                    <div class="timeline-title">ფასის პროგნოზი</div>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-label">5 წუთში</div>
+                            <div class="timeline-prediction ${predictions[0].direction === 'up' ? 'up' : 'down'}">
+                                ${predictions[0].direction === 'up' ? '+' : '-'}${predictions[0].percent}%
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-label">10 წუთში</div>
+                            <div class="timeline-prediction ${predictions[1].direction === 'up' ? 'up' : 'down'}">
+                                ${predictions[1].direction === 'up' ? '+' : '-'}${predictions[1].percent}%
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-label">15 წუთში</div>
+                            <div class="timeline-prediction ${predictions[2].direction === 'up' ? 'up' : 'down'}">
+                                ${predictions[2].direction === 'up' ? '+' : '-'}${predictions[2].percent}%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="technical-indicators">
+                    <div class="timeline-title">ტექნიკური ინდიკატორები</div>
+                    <div class="indicators-grid">
+                        <div class="indicator">
+                            <div class="indicator-name">RSI (14)</div>
+                            <div class="indicator-value">${market.indicators.rsi}</div>
+                        </div>
+                        <div class="indicator">
+                            <div class="indicator-name">MACD</div>
+                            <div class="indicator-value ${market.indicators.macd === 'ბულიშ' ? 'buy' : market.indicators.macd === 'ბეარიშ' ? 'sell' : 'neutral'}">
+                                ${market.indicators.macd}
+                            </div>
+                        </div>
+                        <div class="indicator">
+                            <div class="indicator-name">Stochastic</div>
+                            <div class="indicator-value ${market.indicators.stochastic === 'გადაყიდული' ? 'sell' : market.indicators.stochastic === 'გადასყიდული' ? 'buy' : 'neutral'}">
+                                ${market.indicators.stochastic}
+                            </div>
+                        </div>
+                        <div class="indicator">
+                            <div class="indicator-name">Bollinger Bands</div>
+                            <div class="indicator-value">${market.indicators.bollingerBands}</div>
+                        </div>
+                        <div class="indicator">
+                            <div class="indicator-name">EMA (20)</div>
+                            <div class="indicator-value ${market.indicators.ema20 === 'ფასის ზემოთ' ? 'buy' : 'sell'}">
+                                ${market.indicators.ema20}
+                            </div>
+                        </div>
+                        <div class="indicator">
+                            <div class="indicator-name">EMA (50)</div>
+                            <div class="indicator-value ${market.indicators.ema50 === 'ფასის ზემოთ' ? 'buy' : 'sell'}">
+                                ${market.indicators.ema50}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        // პროგნოზების გენერირება
+        function generatePredictions(market) {
+            const predictions = [];
+            
+            for (let i = 0; i < 3; i++) {
+                const isUp = Math.random() > 0.5;
+                // მეტი ვოლატილობა კრიპტოსთვის, ნაკლები ფორექსისთვის
+                const volatilityFactor = market.type === 'crypto' ? 2.5 : 1.2;
+                const percent = (Math.random() * volatilityFactor).toFixed(2);
+                
+                predictions.push({
+                    direction: isUp ? 'up' : 'down',
+                    percent: percent
+                });
+            }
+            
+            return predictions;
+        }
+        
+        // გრაფიკის გენერირება
+        function generateChartPath(isUp, marketId) {
+            let path = `<path d="M0,80 `;
+            
+            // რანდომული წერტილების გენერირება გრაფიკისთვის
+            const points = [];
+            const pointCount = 20;
+            
+            for (let i = 0; i < pointCount; i++) {
+                const x = i * (300 / (pointCount - 1));
+                let y;
+                
+                if (isUp) {
+                    // ზრდადი ტრენდი რანდომულობით
+                    const progress = i / (pointCount - 1);
+                    const trend = 80 - progress * 60; // იწყება 80-დან (ქვემოთ) და ადის 20-მდე
+                    const randomness = (Math.random() - 0.5) * 20;
+                    y = trend + randomness;
+                } else {
+                    // კლებადი ტრენდი რანდომულობით
+                    const progress = i / (pointCount - 1);
+                    const trend = 20 + progress * 60; // იწყება 20-დან (ზემოთ) და ჩადის 80-მდე
+                    const randomness = (Math.random() - 0.5) * 20;
+                    y = trend + randomness;
+                }
+                
+                points.push({ x, y });
+                path += `${x},${y} `;
+            }
+            
+            // მრუდის დახურვა შევსებისთვის
+            path += `300,100 0,100 Z" class="chart-area-fill" style="fill: url(#gradient-${marketId});" />`;
+            
+            // ხაზის დამატება
+            path += `<path d="M${points.map(p => `${p.x},${p.y}`).join(' ')}" class="chart-line" />`;
+            
+            return path;
+        }
+        
+        // ბაზრის სიგნალების განახლება
+        function updateMarketSignals() {
+            const signals = ['buy', 'sell', 'neutral'];
+            const signalTexts = {
+                'buy': 'ყიდვა',
+                'sell': 'გაყიდვა',
+                'neutral': 'ნეიტრალური'
+            };
+            
+            const volatilitySignals = ['მაღალი', 'საშუალო', 'დაბალი'];
+            const volatilityClasses = {
+                'მაღალი': 'sell',
+                'საშუალო': 'neutral',
+                'დაბალი': 'buy'
+            };
+            
+            // რანდომული სიგნალების დაგენერირება
+            const shortTermSignal = signals[Math.floor(Math.random() * signals.length)];
+            document.getElementById('short-term-signal').className = `signal-value ${shortTermSignal}`;
+            document.getElementById('short-term-signal').textContent = signalTexts[shortTermSignal];
+            
+            const midTermSignal = signals[Math.floor(Math.random() * signals.length)];
+            document.getElementById('mid-term-signal').className = `signal-value ${midTermSignal}`;
+            document.getElementById('mid-term-signal').textContent = signalTexts[midTermSignal];
+            
+            const longTermSignal = signals[Math.floor(Math.random() * signals.length)];
+            document.getElementById('long-term-signal').className = `signal-value ${longTermSignal}`;
+            document.getElementById('long-term-signal').textContent = signalTexts[longTermSignal];
+            
+            const oscillatorSignal = signals[Math.floor(Math.random() * signals.length)];
+            document.getElementById('oscillator-signal').className = `signal-value ${oscillatorSignal}`;
+            document.getElementById('oscillator-signal').textContent = signalTexts[oscillatorSignal];
+            
+            const maSignal = signals[Math.floor(Math.random() * signals.length)];
+            document.getElementById('ma-signal').className = `signal-value ${maSignal}`;
+            document.getElementById('ma-signal').textContent = signalTexts[maSignal];
+            
+            const volatilityIndex = Math.floor(Math.random() * volatilitySignals.length);
+            const volatilitySignal = volatilitySignals[volatilityIndex];
+            document.getElementById('volatility-signal').className = `signal-value ${volatilityClasses[volatilitySignal]}`;
+            document.getElementById('volatility-signal').textContent = volatilitySignal;
+        }
+        
+        // ყველა ბარათის პროგნოზის განახლება
+        function updateAllPredictions() {
+            const container = document.getElementById('markets-container');
+            container.innerHTML = '';
+            
+            marketData.forEach(market => {
+                // რანდომულად ვცვლით ფასებს
+                if (Math.random() > 0.5) {
+                    const changeDirection = Math.random() > 0.5 ? 1 : -1;
+                    const changeMagnitude = market.type === 'crypto' ? 
+                        Math.random() * 200 : 
+                        Math.random() * 0.005;
+                    
+                    market.currentPrice += changeMagnitude * changeDirection;
+                    market.change24h = parseFloat((market.change24h + (Math.random() * 0.5 - 0.25)).toFixed(1));
+                }
+                
+                const card = createMarketCard(market);
+                container.appendChild(card);
+            });
+            
+            updateMarketSignals();
+        }
+        
+        // ინიციალიზაცია და პერიოდული განახლება
+        initializeMarketCards();
+        updateMarketSignals();
+        
+        // ყოველ 30 წამში ინფორმაციის განახლება
+        setInterval(function() {
+            updateAllPredictions();
+        }, 30000);
+    </script>
+</body>
+</html>
